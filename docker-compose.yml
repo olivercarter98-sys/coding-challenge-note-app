@@ -1,0 +1,10 @@
+services:
+  nota:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - nota_data:/app/data
+
+volumes:
+  nota_data:

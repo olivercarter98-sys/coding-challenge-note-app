@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Note App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+  <h1>Note App</h1>
+  <span>Entry log</span>
+</header>
+
+<div class="page">
+
+  <!-- FORM -->
+  <aside class="form-col">
+    <p class="col-label">New entry</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/" novalidate>
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name"
+               value="{{ form.get('name', '') }}"
+               maxlength="100" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email"
+               value="{{ form.get('email', '') }}"
+               autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes"
+                  maxlength="1000">{{ form.get('notes', '') }}</textarea>
+        <div class="char-count" id="char-count">0 / 1000</div>
+      </div>
+      <button type="submit">Save entry</button>
+    </form>
+  </aside>
+
+  <!-- ENTRIES -->
+  <main class="entries-col">
+    <div class="entries-header">
+      <p class="col-label">All entries</p>
+      <span class="entry-count">{{ entries|length }} record{{ 's' if entries|length != 1 }}</span>
+    </div>
+
+    {% if not entries %}
+      <p class="empty-state">No entries yet. Submit the form to get started.</p>
+    {% else %}
+      {% for entry in entries %}
+        <article class="entry" id="entry-{{ entry.id }}">
+
+          <!-- VIEW MODE -->
+          <div class="entry-view" id="view-{{ entry.id }}">
+            <div class="entry-meta">
+              <div class="entry-name">{{ entry.name }}</div>
+              <div class="entry-email">{{ entry.email }}</div>
+            </div>
+            {% if entry.notes %}
+              <p class="entry-notes">{{ entry.notes }}</p>
+            {% endif %}
+            <div class="entry-footer">
+              <span class="entry-date">{{ entry.created_at }} UTC</span>
+              <div class="entry-actions">
+                <button class="delete-btn" onclick="toggleEdit('{{ entry.id }}')">edit</button>
+                <form method="POST" action="/delete/{{ entry.id }}">
+                  <button type="submit" class="delete-btn"
+                          onclick="return confirm('Delete this entry?')">remove</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- EDIT MODE -->
+          <div class="entry-edit" id="edit-{{ entry.id }}" style="display:none;">
+            <form method="POST" action="/update/{{ entry.id }}">
+              <div class="field">
+                <label>Name</label>
+                <input type="text" name="name" value="{{ entry.name }}" maxlength="100" required>
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ entry.email }}" required>
+              </div>
+              <div class="field">
+                <label>Notes</label>
+                <textarea name="notes" maxlength="1000">{{ entry.notes }}</textarea>
+              </div>
+              <div class="edit-actions">
+                <button type="submit" class="save-btn">Save changes</button>
+                <button type="button" class="delete-btn" onclick="toggleEdit('{{ entry.id }}')">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+        </article>
+      {% endfor %}
+    {% endif %}
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+
+</body>
+</html>

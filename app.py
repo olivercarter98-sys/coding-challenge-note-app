@@ -3,7 +3,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from database import init_db, insert_entry, get_all_entries, delete_entry, update_entry
 
 app = Flask(__name__)
-app.secret_key = "note-app-secret-key-change-in-production"
+# In production this should be set via an environment variable e.g. os.environ.get('SECRET_KEY')
+app.secret_key = "nota-secret-key-change-in-production"
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
